@@ -1,6 +1,6 @@
 {
   "name": "react-hierarchical-steps",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A flexible React component for displaying hierarchical data with tree and breadcrumb navigation modes",
   "main": "dist/react-hierarchical-steps.umd.js",
   "module": "dist/react-hierarchical-steps.es.js",

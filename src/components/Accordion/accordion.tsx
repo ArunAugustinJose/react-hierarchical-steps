@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import MUIAccordion from "@mui/material/Accordion";
-import AccordionActions from "@mui/material/AccordionActions";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import Typography from "@mui/material/Typography";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import Button from "@mui/material/Button";
+// import MUIAccordion from "@mui/material/Accordion";
+// import AccordionActions from "@mui/material/AccordionActions";
+// import AccordionSummary from "@mui/material/AccordionSummary";
+// import AccordionDetails from "@mui/material/AccordionDetails";
+// import Typography from "@mui/material/Typography";
+// import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+// import Button from "@mui/material/Button";
 import { StepItem } from "../../common/types";
 
 type AccordionProps = {
@@ -21,7 +21,7 @@ const Accordion = ({ details, handleExplore }: AccordionProps) => {
 
   return (
     <div>
-      <MUIAccordion expanded={expanded} onChange={handleChange}>
+      {/* <MUIAccordion expanded={expanded} onChange={handleChange}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel3-content"
@@ -52,7 +52,7 @@ const Accordion = ({ details, handleExplore }: AccordionProps) => {
             </Button>
           </AccordionActions>
         )}
-      </MUIAccordion>
+      </MUIAccordion> */}
     </div>
   );
 };

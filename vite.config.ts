@@ -1,26 +1,34 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import dts from "vite-plugin-dts";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
+import dts from 'vite-plugin-dts';
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 
 export default defineConfig({
-  plugins: [react(), dts()],
+  plugins: [
+    react(),
+    dts({
+      insertTypesEntry: true,
+      exclude: ['src/Demo.tsx', 'src/demo/**']
+    }),
+    cssInjectedByJsPlugin()
+  ],
   build: {
     lib: {
-      entry: "./src/StepNavigator.tsx",
-      name: "StepNavigator",
-      fileName: "index",
-      formats: ["es", "cjs"],
+      entry: resolve(__dirname, 'src/index.ts'),
+      name: 'ReactHierarchicalSteps',
+      formats: ['es', 'umd'],
+      fileName: (format) => `react-hierarchical-steps.${format}.js`
     },
-    cssCodeSplit: false,
     rollupOptions: {
-      external: [
-        "react",
-        "react-dom",
-        "@mui/material",
-        "@mui/icons-material",
-        "@emotion/react",
-        "@emotion/styled",
-      ],
-    },
-  },
+      external: ['react', 'react-dom', 'react/jsx-runtime'],
+      output: {
+        globals: {
+          react: 'React',
+          'react-dom': 'ReactDOM',
+          'react/jsx-runtime': 'jsx'
+        }
+      }
+    }
+  }
 });

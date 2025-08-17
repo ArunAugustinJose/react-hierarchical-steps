@@ -1,26 +1,487 @@
-.container {
-  padding: 16px;
-}
-
-.boxRoot {
-  display: grid;
-  position: relative;
-  border: 1px solid #ccc;
-  border-radius: 8;
-  max-width: 13rem;
-  width: 13rem;
-  gap: 8px;
-}
-
-.boxTextContainer {
-  padding: 12;
+/* Base Container */
+.stepNavigator {
   width: 100%;
-  position: relative;
-  display: flex;
-  justify-content: space-between;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
-.editIcon {
-  width: 24px;
-  height: 24px;
+/* Theme Variables */
+.light {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --border-color: #e2e8f0;
+  --text-primary: #1a202c;
+  --text-secondary: #4a5568;
+  --button-bg: #edf2f7;
+  --button-hover: #e2e8f0;
+  --accent-color: #3182ce;
+  --accent-hover: #2c5aa0;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dark {
+  --bg-primary: #1a202c;
+  --bg-secondary: #2d3748;
+  --border-color: #4a5568;
+  --text-primary: #f7fafc;
+  --text-secondary: #cbd5e0;
+  --button-bg: #4a5568;
+  --button-hover: #718096;
+  --accent-color: #63b3ed;
+  --accent-hover: #4299e1;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Card Styles */
+.card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+  position: relative;
+  color: var(--text-primary);
+  box-shadow: var(--shadow);
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.cardDescription {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0 0 8px 0;
+  line-height: 1.5;
+}
+
+.cardComment {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 0;
+}
+
+/* Button Styles */
+.button {
+  background: var(--button-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button:hover {
+  background: var(--button-hover);
+}
+
+.buttonPrimary {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
+.buttonPrimary:hover {
+  background: var(--accent-hover);
+}
+
+.addButton {
+  background: var(--bg-secondary);
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent-color);
+  font-weight: 500;
+  width: 100%;
+  justify-content: center;
+}
+
+.addButton:hover {
+  border-color: var(--accent-color);
+  background: var(--bg-primary);
+}
+
+/* Tree Mode Styles */
+.treeNode {
+  position: relative;
+}
+
+.treeStandard .treeNode {
+  margin-left: 24px;
+}
+
+.treeOrganizational {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.treeLevel {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.treeNodeOrg {
+  min-width: 200px;
+  max-width: 250px;
+}
+
+/* Connecting Lines for Standard Tree */
+.connectingLine {
+  position: absolute;
+  background: var(--border-color);
+  z-index: 1;
+}
+
+.connectingLineVertical {
+  left: -12px;
+  top: -12px;
+  width: 2px;
+  height: 36px;
+}
+
+.connectingLineHorizontal {
+  left: -12px;
+  top: 24px;
+  width: 12px;
+  height: 2px;
+}
+
+/* Organizational Tree Layout */
+.orgTreeContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  overflow-x: auto;
+  padding: 20px;
+}
+
+.orgLevel {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 30px 0;
+  position: relative;
+  flex-wrap: nowrap;
+  min-width: fit-content;
+}
+
+.orgNodeWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 15px;
+  position: relative;
+}
+
+.orgCard {
+  min-width: 180px;
+  max-width: 220px;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+/* Vertical line from parent */
+.orgVerticalLine {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  width: 2px;
+  height: 30px;
+  background: var(--border-color);
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+/* Horizontal line connecting siblings */
+.orgHorizontalLine {
+  position: absolute;
+  top: -30px;
+  height: 2px;
+  background: var(--border-color);
+  z-index: 1;
+}
+
+/* Connecting dot at intersections */
+.orgConnectionDot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--border-color);
+  border-radius: 50%;
+  top: -33px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+}
+
+/* Breadcrumb Styles */
+.breadcrumbNav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  flex-wrap: wrap;
+}
+
+.breadcrumbItem {
+  color: var(--accent-color);
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.breadcrumbItem:hover {
+  background: var(--button-bg);
+}
+
+.breadcrumbSeparator {
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+.backButton {
+  margin-left: 16px;
+  background: var(--button-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.backButton:hover {
+  background: var(--button-hover);
+}
+
+/* List and Grid Modes */
+.breadcrumbList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.breadcrumbGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+/* Card Actions */
+.cardActions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.card:hover .cardActions {
+  opacity: 1;
+}
+
+.actionButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Popover Styles */
+.popoverOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.popoverContent {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.popoverTitle {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  color: var(--text-primary);
+}
+
+.formGroup {
+  margin-bottom: 16px;
+}
+
+.formLabel {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+
+.formInput {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 14px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+}
+
+.formTextarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.formActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.formButton {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid var(--border-color);
+}
+
+.formButtonCancel {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.formButtonCancel:hover {
+  background: var(--button-hover);
+}
+
+.formButtonSubmit {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
+.formButtonSubmit:hover {
+  background: var(--accent-hover);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .breadcrumbGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .treeLevel {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .treeNodeOrg {
+    min-width: 280px;
+    max-width: 100%;
+  }
+
+  .popoverOverlay {
+    padding: 10px;
+  }
+
+  .popoverContent {
+    padding: 20px;
+  }
+
+  .breadcrumbNav {
+    font-size: 12px;
+  }
+
+  .formActions {
+    flex-direction: column;
+  }
+
+  .formButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 12px;
+  }
+
+  .cardTitle {
+    font-size: 16px;
+  }
+
+  .treeStandard .treeNode {
+    margin-left: 16px;
+  }
+
+  .popoverContent {
+    padding: 16px;
+  }
+
+  .popoverTitle {
+    font-size: 18px;
+  }
 }

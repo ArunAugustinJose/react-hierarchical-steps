@@ -1,148 +1,200 @@
-import React, { useState } from "react";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  TextField,
-  Typography,
-} from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import AddIcon from "@mui/icons-material/Add";
-import { StepItem } from "./common/types";
-import Breadcrumbs from "./components/Breadcrumb";
-import Accordion from "./components/Accordion";
+import React, { useState, useCallback } from "react";
+import { Plus } from "lucide-react";
+import styles from "./StepNavigator.module.css";
+import { StepItem, StepNavigatorProps, AddEditFormData } from "./common/types";
+import AddEditPopover from "./components/AddEditPopover";
+import { TreeNodeStandard } from "./components/TreeNode";
+import { TreeNodeOrganizational } from "./components/TreeNode";
+import BreadcrumbNavigation from "./components/Breadcrumb";
 
-type StepNavigatorProps = {
-  data: StepItem[];
-  title: string;
-};
+const StepNavigator: React.FC<StepNavigatorProps> = ({
+  data,
+  mode = "breadcrumb",
+  treeDisplayMode = "standard",
+  breadcrumbDisplayMode = "grid",
+  showConnectingLines = true,
+  enableEdit = false,
+  enableAdd = false,
+  onEdit,
+  onAdd,
+  customCardRenderer,
+  customPopoverComponent,
+  className = "",
+  cardClassName = "",
+  theme = "light",
+}) => {
+  const [popoverState, setPopoverState] = useState<{
+    isOpen: boolean;
+    type: "edit" | "add";
+    item: StepItem | null;
+    parentItem: StepItem | null;
+    path: StepItem[];
+  }>({
+    isOpen: false,
+    type: "add",
+    item: null,
+    parentItem: null,
+    path: [],
+  });
 
-const StepNavigator: React.FC<StepNavigatorProps> = ({ data, title }) => {
-  const [path, setPath] = useState<StepItem[]>([]);
-  const [currentItems, setCurrentItems] = useState<StepItem[]>(data);
-  const [open, setOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<StepItem | null>(null);
-  const [suggestion, setSuggestion] = useState("");
+  // Auto-generate IDs if missing
+  const processData = useCallback(
+    (items: StepItem[], prefix = ""): StepItem[] => {
+      return items.map((item, index) => ({
+        ...item,
+        id: item.id || `${prefix}item-${index}`,
+        children: item.children
+          ? processData(item.children, `${prefix}item-${index}-`)
+          : undefined,
+      }));
+    },
+    []
+  );
 
-  const handleItemClick = (item: StepItem) => {
-    if (item.children) {
-      setPath([...path, item]);
-      setCurrentItems(item.children);
+  const processedData = processData(data);
+
+  const handleEditClick = useCallback((item: StepItem, path: StepItem[]) => {
+    setPopoverState({
+      isOpen: true,
+      type: "edit",
+      item,
+      parentItem: null,
+      path,
+    });
+  }, []);
+
+  const handleAddClick = useCallback(
+    (parentItem: StepItem | null, path: StepItem[]) => {
+      setPopoverState({
+        isOpen: true,
+        type: "add",
+        item: null,
+        parentItem,
+        path,
+      });
+    },
+    []
+  );
+
+  const handlePopoverClose = useCallback(() => {
+    setPopoverState((prev) => ({ ...prev, isOpen: false }));
+  }, []);
+
+  const handlePopoverSubmit = useCallback(
+    (data: AddEditFormData) => {
+      const { type, item, parentItem, path } = popoverState;
+
+      if (type === "edit" && item && onEdit) {
+        onEdit(item, data, path);
+      } else if (type === "add" && onAdd) {
+        onAdd(parentItem, data, path);
+      }
+    },
+    [popoverState, onEdit, onAdd]
+  );
+
+  const getPopoverTitle = () => {
+    if (popoverState.type === "edit") {
+      return `Edit: ${popoverState.item?.title || "Item"}`;
     }
+    return popoverState.parentItem
+      ? `Add child to: ${popoverState.parentItem.title}`
+      : "Add new root item";
   };
 
-  const handleBreadcrumbClick = (data: StepItem[]) => {
-    setCurrentItems(data);
+  const getPopoverInitialData = () => {
+    if (popoverState.type === "edit" && popoverState.item) {
+      return {
+        title: popoverState.item.title || "",
+        description: popoverState.item.description || "",
+        comment: popoverState.item.comment || "",
+      };
+    }
+    return {
+      title: "",
+      description: "",
+      comment: "",
+    };
   };
 
-  const handleEditClick = (item: StepItem) => {
-    setEditingItem(item);
-    setSuggestion("");
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    setEditingItem(null);
-  };
-
-  const handleSubmit = () => {
-    console.log("Submitted suggestion for:", editingItem);
-    console.log("Suggestion:", suggestion);
-    setOpen(false);
-  };
-
-  console.log(path, "111111111111path");
   return (
-    <div style={{ padding: 16 }}>
-      <Typography variant="h6">{title}</Typography>
-
-      <Breadcrumbs
-        data={data}
-        handleClick={handleBreadcrumbClick}
-        path={path}
-        setPath={setPath}
-      />
-
-      <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
-        {currentItems.map((item, index) => (
-          <div
-            key={index}
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: 8,
-              padding: 12,
-              width: "15rem",
-              maxWidth: "15rem",
-              height: "fit-content",
-              position: "relative",
-              display: "grid",
-              gap: 16,
-            }}
-          >
-            <div
-              style={{
-                cursor: item.children?.length ? "pointer" : "default",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-              onClick={() => handleItemClick(item)}
-            >
-              <Typography variant="body1">{item.title}</Typography>
-
-              {item.editable && (
-                <IconButton size="small" onClick={() => handleEditClick(item)}>
-                  <EditIcon fontSize="small" />
-                </IconButton>
-              )}
-            </div>
-            <Accordion details={item} handleExplore={handleItemClick} />
-          </div>
-        ))}
-        {path?.length > 0 &&
-          path[path?.length - 1]?.enableOptionForNewChild && (
-            <IconButton
-              size="large"
-              onClick={() => handleEditClick(path[path?.length - 1])}
-              style={{
-                border: "1px solid #ccc",
-                borderRadius: 50,
-                height: "fit-content",
-              }}
-            >
-              <AddIcon fontSize="large" />
-            </IconButton>
+    <div className={`${styles.stepNavigator} ${styles[theme]} ${className}`}>
+      {mode === "tree" ? (
+        <div
+          className={
+            treeDisplayMode === "organizational"
+              ? styles.treeOrganizational
+              : styles.treeStandard
+          }
+        >
+          {treeDisplayMode === "organizational" ? (
+            <TreeNodeOrganizational
+              items={processedData}
+              level={0}
+              path={[]}
+              enableEdit={enableEdit}
+              enableAdd={enableAdd}
+              customCardRenderer={customCardRenderer}
+              cardClassName={cardClassName}
+              theme={theme}
+              onEditClick={handleEditClick}
+              onAddClick={handleAddClick}
+            />
+          ) : (
+            <>
+              {processedData.map((item, index) => (
+                <TreeNodeStandard
+                  key={item.id || index}
+                  item={item}
+                  level={0}
+                  path={[]}
+                  showConnectingLines={showConnectingLines}
+                  enableEdit={enableEdit}
+                  enableAdd={enableAdd}
+                  customCardRenderer={customCardRenderer}
+                  cardClassName={cardClassName}
+                  theme={theme}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                />
+              ))}
+            </>
           )}
-      </div>
 
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Submit Suggestion</DialogTitle>
-        <DialogContent>
-          <Typography gutterBottom>{editingItem?.title}</Typography>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Your suggestion"
-            fullWidth
-            multiline
-            rows={4}
-            value={suggestion}
-            onChange={(e) => setSuggestion(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} color="primary">
-            Submit
-          </Button>
-        </DialogActions>
-      </Dialog>
+          {/* Add root level item for tree mode */}
+          {enableAdd && onAdd && (
+            <button
+              className={styles.addButton}
+              onClick={() => handleAddClick(null, [])}
+            >
+              <Plus size={16} />
+              Add new root step
+            </button>
+          )}
+        </div>
+      ) : (
+        <BreadcrumbNavigation
+          data={processedData}
+          displayMode={breadcrumbDisplayMode}
+          enableEdit={enableEdit}
+          enableAdd={enableAdd}
+          customCardRenderer={customCardRenderer}
+          cardClassName={cardClassName}
+          theme={theme}
+          onEditClick={handleEditClick}
+          onAddClick={handleAddClick}
+        />
+      )}
+
+      {/* Popover for Add/Edit */}
+      <AddEditPopover
+        isOpen={popoverState.isOpen}
+        onClose={handlePopoverClose}
+        onSubmit={handlePopoverSubmit}
+        initialData={getPopoverInitialData()}
+        title={getPopoverTitle()}
+        customComponent={customPopoverComponent}
+      />
     </div>
   );
 };

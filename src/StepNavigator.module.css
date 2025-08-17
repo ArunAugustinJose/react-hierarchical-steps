@@ -1,0 +1,26 @@
+.container {
+  padding: 16px;
+}
+
+.boxRoot {
+  display: grid;
+  position: relative;
+  border: 1px solid #ccc;
+  border-radius: 8;
+  max-width: 13rem;
+  width: 13rem;
+  gap: 8px;
+}
+
+.boxTextContainer {
+  padding: 12;
+  width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+}
+
+.editIcon {
+  width: 24px;
+  height: 24px;
+}
